@@ -1,5 +1,7 @@
 'use strict';
 
+var TraceKit = require('../vendor/TraceKit/tracekit');
+
 // First, check for JSON support
 // If there is no JSON, we no-op the core features of Raven
 // since JSON is required to encode the payload
@@ -42,6 +44,8 @@ for (var method in originalConsole) {
  */
 var Raven = {
     VERSION: '<%= pkg.version %>',
+
+    TraceKit: TraceKit, // temporarily exported for tests
 
     debug: true,
 
@@ -920,9 +924,7 @@ function uuid4() {
 
 function logDebug(level) {
     if (originalConsoleMethods[level] && Raven.debug) {
-        // _slice is coming from vendor/TraceKit/tracekit.js
-        // so it's accessible globally
-        originalConsoleMethods[level].apply(originalConsole, _slice.call(arguments, 1));
+        originalConsoleMethods[level].apply(originalConsole, [].slice.call(arguments, 1));
     }
 }
 
@@ -951,3 +953,5 @@ function mergeContext(key, context) {
 }
 
 afterLoad();
+
+module.exports = Raven;
