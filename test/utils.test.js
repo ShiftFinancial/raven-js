@@ -11,8 +11,10 @@ var isString = utils.isString;
 var isObject = utils.isObject;
 var isEmptyObject = utils.isEmptyObject;
 var isError = utils.isError;
+var joinRegExp = utils.joinRegExp;
 var objectMerge = utils.objectMerge;
 var truncate = utils.truncate;
+var urlencode = utils.urlencode;
 
 describe('utils', function () {
     describe('isUndefined', function() {
@@ -83,6 +85,35 @@ describe('utils', function () {
             assert.equal(truncate('lolol', 3), 'lol\u2026');
             assert.equal(truncate('lolol', 10), 'lolol');
             assert.equal(truncate('lol', 3), 'lol');
+        });
+    });
+
+
+    describe('joinRegExp', function() {
+        it('should work as advertised', function() {
+            assert.equal(joinRegExp([
+                'a', 'b', 'a.b', /d/, /[0-9]/
+            ]).source, 'a|b|a\\.b|d|[0-9]');
+        });
+
+        it('should not process empty or undefined variables', function() {
+            assert.equal(joinRegExp([
+                'a', 'b', null, undefined
+            ]).source, 'a|b');
+        });
+
+        it('should skip entries that are not strings or regular expressions in the passed array of patterns', function() {
+            assert.equal(joinRegExp([
+                'a', 'b', null, 'a.b', undefined, true, /d/, 123, {}, /[0-9]/, []
+            ]).source, 'a|b|a\\.b|d|[0-9]');
+        });
+    });
+
+
+    describe('urlencode', function() {
+        it('should work', function() {
+            assert.equal(urlencode({}), '');
+            assert.equal(urlencode({'foo': 'bar', 'baz': '1 2'}), 'foo=bar&baz=1%202');
         });
     });
 });
